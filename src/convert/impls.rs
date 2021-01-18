@@ -1,9 +1,12 @@
 use core::char;
 use core::mem::{self, ManuallyDrop};
 
+use std::string::ToString;
+
 use crate::convert::traits::WasmAbi;
 use crate::convert::{FromWasmAbi, IntoWasmAbi, RefFromWasmAbi};
 use crate::convert::{OptionFromWasmAbi, OptionIntoWasmAbi, ReturnWasmAbi};
+use crate::describe::WasmDescribe;
 use crate::{Clamped, JsValue};
 
 unsafe impl WasmAbi for () {}
@@ -396,14 +399,70 @@ impl IntoWasmAbi for () {
     }
 }
 
-impl<T: IntoWasmAbi> ReturnWasmAbi for Result<T, JsValue> {
-    type Abi = T::Abi;
+#[derive(Clone)]
+pub struct JsError {
+    value: JsValue,
+}
+
+impl JsError {
+    #[inline]
+    fn new(s: &str) -> JsError {
+        Self {
+            value: unsafe { JsValue::_new(crate::__wbindgen_error_new(s.as_ptr(), s.len())) },
+        }
+    }
+}
+
+impl<E> From<E> for JsError
+where
+    E: std::error::Error,
+{
+    fn from(error: E) -> Self {
+        JsError::new(&error.to_string())
+    }
+}
+
+impl From<JsError> for JsValue {
+    fn from(error: JsError) -> Self {
+        error.value
+    }
+}
+
+impl From<()> for JsValue {
+    fn from(error: ()) -> Self {
+        JsValue::UNDEFINED
+    }
+}
+
+impl<T> ReturnWasmAbi for Result<T, JsError>
+where
+    T: Into<JsValue> + WasmDescribe,
+{
+    type Abi = <JsValue as ReturnWasmAbi>::Abi;
 
     #[inline]
     fn return_abi(self) -> Self::Abi {
-        match self {
-            Ok(v) => v.into_abi(),
-            Err(e) => crate::throw_val(e),
-        }
+        let jsval = match self {
+            Ok(v) => v.into(),
+            Err(e) => e.into(),
+        };
+        jsval.into_abi()
+    }
+}
+
+impl<T> ReturnWasmAbi for Result<T, JsValue>
+where
+    T: Into<JsValue> + WasmDescribe,
+{
+    type Abi = <JsValue as ReturnWasmAbi>::Abi;
+
+    #[inline]
+    fn return_abi(self) -> Self::Abi {
+        let jsval = match self {
+            Ok(v) => v.into(),
+            // todo: better
+            Err(e) => JsError { value: e }.into(),
+        };
+        jsval.into_abi()
     }
 }

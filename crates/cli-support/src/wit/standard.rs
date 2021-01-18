@@ -219,6 +219,8 @@ pub enum Instruction {
         mem: walrus::MemoryId,
     },
 
+    ThrowIfError,
+
     /// pops a `i32`, pushes `bool`
     BoolFromI32,
     /// pops `i32`, loads externref at that slot, dealloates externref, pushes `externref`

@@ -783,6 +783,15 @@ fn instruction(js: &mut JsBuilder, instr: &Instruction, log_error: &mut bool) ->
             js.push(format!("len{}", i));
         }
 
+        Instruction::ThrowIfError => {
+            let val = js.pop();
+            js.cx.expose_throw_if_error();
+            let i = js.tmp();
+            js.prelude(&format!("var tmp{i} = {val};", i = i, val = val));
+            js.prelude(&format!("throwIfError(tmp{i});", i = i));
+            js.push(format!("tmp{i}", i = i));
+        }
+
         Instruction::OptionString {
             mem,
             malloc,

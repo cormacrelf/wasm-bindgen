@@ -1932,6 +1932,21 @@ impl<'a> Context<'a> {
         name
     }
 
+    fn expose_throw_if_error(&mut self) {
+        if !self.should_write_global("throw_if_error") {
+            return;
+        }
+        self.global(
+            "
+            function throwIfError(x) {
+                if (x instanceof Error) {
+                    throw x;
+                }
+            }
+            ",
+            );
+    }
+
     fn expose_is_like_none(&mut self) {
         if !self.should_write_global("is_like_none") {
             return;
@@ -2287,6 +2302,7 @@ impl<'a> Context<'a> {
     }
 
     fn generate_adapter(
+        // here's the good stuff!!!
         &mut self,
         id: AdapterId,
         adapter: &Adapter,
@@ -3139,6 +3155,11 @@ impl<'a> Context<'a> {
             Intrinsic::Rethrow => {
                 assert_eq!(args.len(), 1);
                 format!("throw {}", args[0])
+            }
+
+            Intrinsic::ErrorNew => {
+                assert_eq!(args.len(), 1);
+                format!("new Error({})", args[0])
             }
 
             Intrinsic::Module => {

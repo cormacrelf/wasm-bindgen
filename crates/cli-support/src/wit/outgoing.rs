@@ -149,6 +149,7 @@ impl InstructionBuilder<'_, '_> {
             }
 
             Descriptor::Option(d) => self.outgoing_option(d)?,
+            Descriptor::Result(d) => self.outgoing_result(d)?,
 
             Descriptor::Function(_) | Descriptor::Closure(_) | Descriptor::Slice(_) => bail!(
                 "unsupported argument type for calling JS function from Rust: {:?}",
@@ -334,6 +335,55 @@ impl InstructionBuilder<'_, '_> {
                 arg
             ),
         }
+        Ok(())
+    }
+
+    fn outgoing_result(&mut self, arg: &Descriptor) -> Result<(), Error> {
+        let (instr, ty) = match arg {
+            // Unit becomes undefined
+            Descriptor::Externref => (Instruction::ExternrefLoadOwned, AdapterType::Externref),
+            Descriptor::NamedExternref(name) => (
+                Instruction::ExternrefLoadOwned,
+                AdapterType::NamedExternref(name.clone()),
+            ),
+            Descriptor::RustStruct(name) => (
+                Instruction::RustFromI32 {
+                    class: name.to_string(),
+                },
+                AdapterType::Struct(name.clone()),
+            ),
+            // TODO: the rest of these types
+            Descriptor::Enum { .. }
+            | Descriptor::I64
+            | Descriptor::U64
+            | Descriptor::I32
+            | Descriptor::U32
+            | Descriptor::I16
+            | Descriptor::U16
+            | Descriptor::I8
+            | Descriptor::U8
+            | Descriptor::Boolean
+            | Descriptor::Char
+            | Descriptor::String
+            | Descriptor::Unit => (Instruction::ExternrefLoadOwned, AdapterType::Externref),
+            _ => bail!("unsupported Result return type: {:?}", arg),
+        };
+        self.get(AdapterType::I32);
+        self.instructions.push(InstructionData {
+            instr,
+            stack_change: StackChange::Modified {
+                popped: 1,
+                pushed: 1,
+            },
+        });
+        self.instructions.push(InstructionData {
+            instr: Instruction::ThrowIfError,
+            stack_change: StackChange::Modified {
+                popped: 1,
+                pushed: 1,
+            },
+        });
+        self.output.push(ty);
         Ok(())
     }
 
