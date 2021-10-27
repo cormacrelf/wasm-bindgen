@@ -406,7 +406,7 @@ pub struct JsError {
 
 impl JsError {
     #[inline]
-    fn new(s: &str) -> JsError {
+    pub fn new(s: &str) -> JsError {
         Self {
             value: unsafe { JsValue::_new(crate::__wbindgen_error_new(s.as_ptr(), s.len())) },
         }
@@ -431,6 +431,19 @@ impl From<JsError> for JsValue {
 impl From<()> for JsValue {
     fn from(error: ()) -> Self {
         JsValue::UNDEFINED
+    }
+}
+
+impl WasmDescribe for JsError {
+    fn describe() {
+        JsValue::describe();
+    }
+}
+impl IntoWasmAbi for JsError {
+    type Abi = <JsValue as IntoWasmAbi>::Abi;
+
+    fn into_abi(self) -> Self::Abi {
+        self.value.into_abi()
     }
 }
 
