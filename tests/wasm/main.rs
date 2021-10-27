@@ -34,6 +34,7 @@ pub mod no_shims;
 pub mod node;
 pub mod option;
 pub mod optional_primitives;
+pub mod result;
 pub mod rethrow;
 pub mod simple;
 pub mod slice;
