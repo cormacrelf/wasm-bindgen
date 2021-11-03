@@ -428,12 +428,6 @@ impl From<JsError> for JsValue {
     }
 }
 
-impl From<()> for JsValue {
-    fn from(error: ()) -> Self {
-        JsValue::UNDEFINED
-    }
-}
-
 impl WasmDescribe for JsError {
     fn describe() {
         JsValue::describe();
