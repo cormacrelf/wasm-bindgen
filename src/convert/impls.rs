@@ -441,19 +441,44 @@ impl IntoWasmAbi for JsError {
     }
 }
 
+#[repr(C)]
+pub struct ResultAbi<T> {
+    is_ok: u32,
+    abi: ResultAbiUnion<T>,
+}
+
+#[repr(C)]
+pub union ResultAbiUnion<T> {
+    ok: std::mem::ManuallyDrop<T>,
+    err: u32,
+}
+
+unsafe impl<T: WasmAbi> WasmAbi for ResultAbi<T> {}
+unsafe impl<T: WasmAbi> WasmAbi for ResultAbiUnion<T> {}
+
 impl<T: IntoWasmAbi, E: Into<JsValue>> ReturnWasmAbi for Result<T, E> {
-    type Abi = <JsValue as IntoWasmAbi>::Abi;
+    type Abi = ResultAbi<T::Abi>;
     #[inline]
     fn return_abi(self) -> Self::Abi {
         match self {
             Ok(v) => {
-                let abi = v.into_abi();
-                let idx = <T::Abi as WasmAbi>::as_result_ok(abi);
-                idx
+                let abi = ResultAbiUnion {
+                    ok: std::mem::ManuallyDrop::new(v.into_abi()),
+                };
+                ResultAbi {
+                    is_ok: true.into_abi(),
+                    abi,
+                }
             }
             Err(e) => {
                 let jsval = e.into();
-                unsafe { crate::__wbindgen_wasm_result_err(jsval.into_abi()) }
+                let abi = ResultAbiUnion {
+                    err: jsval.into_abi(),
+                };
+                ResultAbi {
+                    is_ok: true.into_abi(),
+                    abi,
+                }
             }
         }
     }

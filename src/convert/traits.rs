@@ -96,35 +96,12 @@ pub trait OptionFromWasmAbi: FromWasmAbi {
 /// This is an unsafe trait to implement as there's no guarantee the type is
 /// actually safe to transfer across the was boundary, it's up to you to
 /// guarantee this so codegen works correctly.
-pub unsafe trait WasmAbi {
-    fn as_result_ok(self) -> u32
-    where
-        Self: Sized,
-    {
-        unimplemented!("new method added to trait WasmAbi, needs default implementation")
-    }
-}
+pub unsafe trait WasmAbi {}
 
-unsafe impl WasmAbi for u32 {
-    fn as_result_ok(self) -> u32 {
-        unsafe { crate::__wbindgen_wasm_result_ok_u32(self) }
-    }
-}
-unsafe impl WasmAbi for i32 {
-    fn as_result_ok(self) -> u32 {
-        unsafe { crate::__wbindgen_wasm_result_ok_i32(self) }
-    }
-}
-unsafe impl WasmAbi for f32 {
-    fn as_result_ok(self) -> u32 {
-        unsafe { crate::__wbindgen_wasm_result_ok_f32(self) }
-    }
-}
-unsafe impl WasmAbi for f64 {
-    fn as_result_ok(self) -> u32 {
-        unsafe { crate::__wbindgen_wasm_result_ok_f64(self) }
-    }
-}
+unsafe impl WasmAbi for u32 {}
+unsafe impl WasmAbi for i32 {}
+unsafe impl WasmAbi for f32 {}
+unsafe impl WasmAbi for f64 {}
 
 /// A trait representing how to interepret the return value of a function for
 /// the wasm ABI.

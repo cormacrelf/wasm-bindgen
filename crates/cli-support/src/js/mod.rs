@@ -3168,20 +3168,6 @@ impl<'a> Context<'a> {
                 format!("new Error({})", args[0])
             }
 
-            Intrinsic::WasmResultOkU32
-            | Intrinsic::WasmResultOkI32
-            | Intrinsic::WasmResultOkF32
-            | Intrinsic::WasmResultOkF64 => {
-                assert_eq!(args.len(), 1);
-                // function WasmResult(value, isErr), defined above
-                format!("new WasmResult({}, false)", args[0])
-            }
-            Intrinsic::WasmResultErr => {
-                assert_eq!(args.len(), 1);
-                // The intrinsic's signature does takeObject for us
-                format!("new WasmResult({}, true)", args[0])
-            }
-
             Intrinsic::Module => {
                 assert_eq!(args.len(), 0);
                 if !self.config.mode.no_modules() && !self.config.mode.web() {
