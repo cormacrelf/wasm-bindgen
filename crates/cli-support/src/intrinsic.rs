@@ -223,9 +223,21 @@ intrinsics! {
         #[symbol = "__wbindgen_error_new"]
         #[signature = fn(ref_string()) -> Externref]
         ErrorNew,
-        #[symbol = "__wbindgen_wasm_result_new"]
-        #[signature = fn(Externref, Boolean) -> Externref]
-        WasmResultNew,
+        #[symbol = "__wbindgen_wasm_result_ok_u32"]
+        #[signature = fn(U32) -> Externref]
+        WasmResultOkU32,
+        #[symbol = "__wbindgen_wasm_result_ok_i32"]
+        #[signature = fn(I32) -> Externref]
+        WasmResultOkI32,
+        #[symbol = "__wbindgen_wasm_result_ok_f32"]
+        #[signature = fn(F32) -> Externref]
+        WasmResultOkF32,
+        #[symbol = "__wbindgen_wasm_result_ok_f64"]
+        #[signature = fn(F64) -> Externref]
+        WasmResultOkF64,
+        #[symbol = "__wbindgen_wasm_result_err"]
+        #[signature = fn(Externref) -> Externref]
+        WasmResultErr,
         #[symbol = "__wbindgen_memory"]
         #[signature = fn() -> Externref]
         Memory,

@@ -3,7 +3,7 @@
 
 #![doc(hidden)]
 
-use crate::{Clamped, JsError, JsValue};
+use crate::{Clamped, JsValue};
 use cfg_if::cfg_if;
 
 macro_rules! tys {
@@ -171,16 +171,10 @@ impl WasmDescribe for () {
     }
 }
 
-impl<T: WasmDescribe> WasmDescribe for Result<T, JsValue> {
-    fn describe() {
-        T::describe();
-    }
-}
-
-impl<T: WasmDescribe> WasmDescribe for Result<T, JsError> {
+impl<T: WasmDescribe, E: Into<JsValue>> WasmDescribe for Result<T, E> {
     fn describe() {
         inform(RESULT);
-        T::describe()
+        T::describe();
     }
 }
 

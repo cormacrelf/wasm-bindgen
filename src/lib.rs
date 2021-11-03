@@ -928,6 +928,12 @@ externs! {
         fn __wbindgen_rethrow(a: u32) -> !;
         fn __wbindgen_error_new(a: *const u8, b: usize) -> u32;
 
+        fn __wbindgen_wasm_result_ok_u32(value: u32) -> u32;
+        fn __wbindgen_wasm_result_ok_i32(value: i32) -> u32;
+        fn __wbindgen_wasm_result_ok_f32(value: f32) -> u32;
+        fn __wbindgen_wasm_result_ok_f64(value: f64) -> u32;
+        fn __wbindgen_wasm_result_err(err: u32) -> u32;
+
         fn __wbindgen_cb_drop(idx: u32) -> u32;
 
         fn __wbindgen_describe(v: u32) -> ();

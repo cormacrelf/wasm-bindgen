@@ -441,31 +441,20 @@ impl IntoWasmAbi for JsError {
     }
 }
 
-impl<T> ReturnWasmAbi for Result<T, JsError>
-where
-    T: Into<JsValue> + WasmDescribe,
-{
-    type Abi = <JsValue as ReturnWasmAbi>::Abi;
-
-    #[inline]
-    fn return_abi(self) -> Self::Abi {
-        let jsval = match self {
-            Ok(v) => v.into(),
-            Err(e) => e.into(),
-        };
-        jsval.into_abi()
-    }
-}
-
-impl<T: IntoWasmAbi> ReturnWasmAbi for Result<T, JsValue> {
-    type Abi = T::Abi;
-
+impl<T: IntoWasmAbi, E: Into<JsValue>> ReturnWasmAbi for Result<T, E> {
+    type Abi = <JsValue as IntoWasmAbi>::Abi;
     #[inline]
     fn return_abi(self) -> Self::Abi {
         match self {
-            Ok(v) => v.into_abi(),
-            // TODO: should not leak stack space
-            Err(e) => crate::throw_val(e),
+            Ok(v) => {
+                let abi = v.into_abi();
+                let idx = <T::Abi as WasmAbi>::as_result_ok(abi);
+                idx
+            }
+            Err(e) => {
+                let jsval = e.into();
+                unsafe { crate::__wbindgen_wasm_result_err(jsval.into_abi()) }
+            }
         }
     }
 }

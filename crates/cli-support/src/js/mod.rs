@@ -1933,7 +1933,7 @@ impl<'a> Context<'a> {
     }
 
     fn expose_wasm_result_class(&mut self) {
-        if !self.should_write_global("throw_if_error") {
+        if !self.should_write_global("expose_wasm_result_class") {
             return;
         }
         self.global(
@@ -1950,7 +1950,7 @@ impl<'a> Context<'a> {
                 return this.value;
             }
             ",
-            );
+        );
     }
 
     fn expose_is_like_none(&mut self) {
@@ -3168,9 +3168,18 @@ impl<'a> Context<'a> {
                 format!("new Error({})", args[0])
             }
 
-            Intrinsic::WasmResultNew => {
-                assert_eq!(args.len(), 2);
-                format!("new WasmResult({}, {})", args[0], args[1])
+            Intrinsic::WasmResultOkU32
+            | Intrinsic::WasmResultOkI32
+            | Intrinsic::WasmResultOkF32
+            | Intrinsic::WasmResultOkF64 => {
+                assert_eq!(args.len(), 1);
+                // function WasmResult(value, isErr), defined above
+                format!("new WasmResult({}, false)", args[0])
+            }
+            Intrinsic::WasmResultErr => {
+                assert_eq!(args.len(), 1);
+                // The intrinsic's signature does takeObject for us
+                format!("new WasmResult({}, true)", args[0])
             }
 
             Intrinsic::Module => {
