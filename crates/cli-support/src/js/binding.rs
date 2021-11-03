@@ -785,11 +785,12 @@ fn instruction(js: &mut JsBuilder, instr: &Instruction, log_error: &mut bool) ->
 
         Instruction::ThrowIfError => {
             let val = js.pop();
-            js.cx.expose_throw_if_error();
+            js.cx.expose_wasm_result_class();
             let i = js.tmp();
-            js.prelude(&format!("var tmp{i} = {val};", i = i, val = val));
-            js.prelude(&format!("throwIfError(tmp{i});", i = i));
-            js.push(format!("tmp{i}", i = i));
+            let j = js.tmp();
+            js.prelude(&format!("var tmp{i} = {val});", i = i, val = val));
+            js.prelude(&format!("var tmp{j} = tmp{i}.unwrap();", j = j, i = i));
+            js.push(format!("tmp{j}", j = j));
         }
 
         Instruction::OptionString {

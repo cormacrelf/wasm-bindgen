@@ -223,6 +223,9 @@ intrinsics! {
         #[symbol = "__wbindgen_error_new"]
         #[signature = fn(ref_string()) -> Externref]
         ErrorNew,
+        #[symbol = "__wbindgen_wasm_result_new"]
+        #[signature = fn(Externref, Boolean) -> Externref]
+        WasmResultNew,
         #[symbol = "__wbindgen_memory"]
         #[signature = fn() -> Externref]
         Memory,

@@ -1932,16 +1932,22 @@ impl<'a> Context<'a> {
         name
     }
 
-    fn expose_throw_if_error(&mut self) {
+    fn expose_wasm_result_class(&mut self) {
         if !self.should_write_global("throw_if_error") {
             return;
         }
         self.global(
             "
-            function throwIfError(x) {
-                if (x instanceof Error) {
-                    throw x;
+            function WasmResult(value, isErr) {
+                this.value = value;
+                this.isErr = isErr;
+            }
+
+            WasmResult.prototype.unwrap = function unwrap() {
+                if (this.isErr) {
+                    throw this.value;
                 }
+                return this.value;
             }
             ",
             );
@@ -3160,6 +3166,11 @@ impl<'a> Context<'a> {
             Intrinsic::ErrorNew => {
                 assert_eq!(args.len(), 1);
                 format!("new Error({})", args[0])
+            }
+
+            Intrinsic::WasmResultNew => {
+                assert_eq!(args.len(), 2);
+                format!("new WasmResult({}, {})", args[0], args[1])
             }
 
             Intrinsic::Module => {
