@@ -463,19 +463,15 @@ where
     }
 }
 
-impl<T> ReturnWasmAbi for Result<T, JsValue>
-where
-    T: Into<JsValue> + WasmDescribe,
-{
-    type Abi = <JsValue as ReturnWasmAbi>::Abi;
+impl<T: IntoWasmAbi> ReturnWasmAbi for Result<T, JsValue> {
+    type Abi = T::Abi;
 
     #[inline]
     fn return_abi(self) -> Self::Abi {
-        let jsval = match self {
-            Ok(v) => v.into(),
-            // todo: better
-            Err(e) => JsError { value: e }.into(),
-        };
-        jsval.into_abi()
+        match self {
+            Ok(v) => v.into_abi(),
+            // TODO: should not leak stack space
+            Err(e) => crate::throw_val(e),
+        }
     }
 }

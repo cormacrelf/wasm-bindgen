@@ -171,20 +171,13 @@ impl WasmDescribe for () {
     }
 }
 
-impl<T> WasmDescribe for Result<T, JsValue>
-where
-    T: Into<JsValue> + WasmDescribe,
-{
+impl<T: WasmDescribe> WasmDescribe for Result<T, JsValue> {
     fn describe() {
-        inform(RESULT);
         T::describe();
     }
 }
 
-impl<T> WasmDescribe for Result<T, JsError>
-where
-    T: Into<JsValue> + WasmDescribe,
-{
+impl<T: WasmDescribe> WasmDescribe for Result<T, JsError> {
     fn describe() {
         inform(RESULT);
         T::describe()
