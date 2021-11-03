@@ -783,14 +783,15 @@ fn instruction(js: &mut JsBuilder, instr: &Instruction, log_error: &mut bool) ->
             js.push(format!("len{}", i));
         }
 
-        Instruction::ThrowIfError => {
-            let val = js.pop();
-            js.cx.expose_wasm_result_class();
+        Instruction::UnwrapResult => {
+            // The top of the stack is a nullable u32. If it is nonzero, takeObject and throw it.
             let i = js.tmp();
-            let j = js.tmp();
-            js.prelude(&format!("var tmp{i} = {val};", i = i, val = val));
-            js.prelude(&format!("var tmp{j} = tmp{i}.unwrap();", j = j, i = i));
-            js.push(format!("tmp{j}", j = j));
+            let val = js.pop();
+            js.prelude(&format!("var err{i} = {val};", i = i, val = val));
+            js.prelude(&format!(
+                "if (err{i} !== 0) {{ throw takeObject(err{i}); }}",
+                i = i
+            ));
         }
 
         Instruction::OptionString {

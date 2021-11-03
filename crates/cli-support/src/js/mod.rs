@@ -1932,27 +1932,6 @@ impl<'a> Context<'a> {
         name
     }
 
-    fn expose_wasm_result_class(&mut self) {
-        if !self.should_write_global("expose_wasm_result_class") {
-            return;
-        }
-        self.global(
-            "
-            function WasmResult(value, isErr) {
-                this.value = value;
-                this.isErr = isErr;
-            }
-
-            WasmResult.prototype.unwrap = function unwrap() {
-                if (this.isErr) {
-                    throw this.value;
-                }
-                return this.value;
-            }
-            ",
-        );
-    }
-
     fn expose_is_like_none(&mut self) {
         if !self.should_write_global("is_like_none") {
             return;

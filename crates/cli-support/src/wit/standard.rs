@@ -219,7 +219,7 @@ pub enum Instruction {
         mem: walrus::MemoryId,
     },
 
-    ThrowIfError,
+    UnwrapResult,
 
     /// pops a `i32`, pushes `bool`
     BoolFromI32,
